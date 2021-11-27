@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and test rust solutions
+        run: |
+          for d in */; do
+            if [[ -f "$d/Cargo.toml" ]]; then
+              cd "$d"
+              printf '\n\nChecking %s\n\n' "$d"
+              cargo check || printf '%s\n' "$d" >> failures
+              cargo test || printf '%s\n' "$d" >> failures
+              cd -
+            fi
+          done
+
+          if [[ -f failures ]]; then
+            printf 'One or more tests failed:\n' 1>&2
+            cat failure 1>&2
+            exit 1
+          fi
