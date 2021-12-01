@@ -1,25 +1,26 @@
 use std::{
     fs::File,
-    io::{BufRead, BufReader},
+    io::{self, BufRead, BufReader},
+    num::ParseIntError,
 };
 
-use anyhow::Result;
 use itermore::IterMore;
 
-fn main() -> Result<()> {
+fn main() -> Result<(), anyhow::Error> {
     let puzzle_input = File::open("input.txt")?;
+
     let measurements: Vec<u16> = BufReader::new(puzzle_input)
         .lines()
-        .map(|m| m.unwrap().parse::<u16>().unwrap())
-        .collect();
+        .collect::<Result<Vec<String>, io::Error>>()?
+        .into_iter()
+        .map(|measurement| measurement.parse())
+        .collect::<Result<Vec<u16>, ParseIntError>>()?;
 
     println!("part 1: {}", count_number_of_increases(&measurements));
 
-    let sum_sliding_windows = sum_three_measurement_windows(&measurements);
-    println!(
-        "part 2: {}",
-        count_number_of_increases(&sum_sliding_windows)
-    );
+    let sliding_windows_sums = sum_three_measurement_windows(&measurements);
+    let number_of_increases_2 = count_number_of_increases(&sliding_windows_sums);
+    println!("part 2: {}", number_of_increases_2);
 
     Ok(())
 }
