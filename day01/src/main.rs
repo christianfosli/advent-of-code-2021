@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::Result;
+use itermore::IterMore;
 
 fn main() -> Result<()> {
     let puzzle_input = File::open("input.txt")?;
@@ -16,18 +17,8 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn count_number_of_increases(measurements: &[u16]) -> u16 {
-    let (_prev, increase_count) =
-        measurements
-            .into_iter()
-            .fold((measurements[0], 0u16), |(prev, increase_count), x| {
-                if *x > prev {
-                    return (*x, increase_count + 1);
-                }
-                (*x, increase_count)
-            });
-
-    increase_count
+fn count_number_of_increases(measurements: &[u16]) -> usize {
+    measurements.iter().windows().filter(|[a, b]| b > a).count()
 }
 
 #[cfg(test)]
