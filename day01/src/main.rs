@@ -1,19 +1,12 @@
-use std::{
-    fs::File,
-    io::{self, BufRead, BufReader},
-    num::ParseIntError,
-};
+use std::{fs, num::ParseIntError};
 
 use itermore::IterMore;
 
 fn main() -> Result<(), anyhow::Error> {
-    let puzzle_input = File::open("input.txt")?;
-
-    let measurements: Vec<u16> = BufReader::new(puzzle_input)
+    let measurements: Vec<u16> = fs::read_to_string("input.txt")?
         .lines()
-        .collect::<Result<Vec<String>, io::Error>>()?
         .into_iter()
-        .map(|measurement| measurement.parse())
+        .map(str::parse)
         .collect::<Result<Vec<u16>, ParseIntError>>()?;
 
     println!("part 1: {}", count_number_of_increases(&measurements));
