@@ -37,26 +37,33 @@ struct SubmarinePos {
     /// Horizontal position
     hpos: u32,
     depth: u32,
+    aim: u32,
 }
 
 impl SubmarinePos {
     fn from(movements: &[MoveCmd]) -> Self {
-        movements
-            .iter()
-            .fold(SubmarinePos { hpos: 0, depth: 0 }, |acc, x| match x {
+        movements.iter().fold(
+            SubmarinePos {
+                hpos: 0,
+                depth: 0,
+                aim: 0,
+            },
+            |acc, x| match x {
                 MoveCmd::Down(n) => SubmarinePos {
-                    depth: acc.depth + u32::from(*n),
+                    aim: acc.aim + u32::from(*n),
                     ..acc
                 },
                 MoveCmd::Up(n) => SubmarinePos {
-                    depth: acc.depth - u32::from(*n),
+                    aim: acc.aim - u32::from(*n),
                     ..acc
                 },
                 MoveCmd::Forward(n) => SubmarinePos {
                     hpos: acc.hpos + u32::from(*n),
+                    depth: acc.depth + acc.aim * u32::from(*n),
                     ..acc
                 },
-            })
+            },
+        )
     }
 }
 
@@ -70,7 +77,7 @@ fn main() -> Result<(), anyhow::Error> {
         .map(|m| m.parse())
         .collect::<Result<Vec<MoveCmd>, ParseMoveCmdError>>()?;
 
-    let SubmarinePos { hpos, depth } = SubmarinePos::from(&movements);
+    let SubmarinePos { hpos, depth, .. } = SubmarinePos::from(&movements);
     println!("{}", hpos * depth);
 
     Ok(())
@@ -81,7 +88,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_passes_aoc_testcase_part_1() {
+    fn it_passes_aoc_testcase_part_2() {
         let planned_course = vec![
             MoveCmd::Forward(5),
             MoveCmd::Down(5),
@@ -92,6 +99,6 @@ mod tests {
         ];
 
         let pos = SubmarinePos::from(&planned_course);
-        assert_eq!(150, pos.hpos * pos.depth);
+        assert_eq!(900, pos.hpos * pos.depth);
     }
 }
