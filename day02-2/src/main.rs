@@ -1,8 +1,4 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-    str::FromStr,
-};
+use std::{fs, str::FromStr};
 
 #[derive(PartialEq)]
 enum MoveCmd {
@@ -11,25 +7,21 @@ enum MoveCmd {
     Forward(u8),
 }
 
-#[derive(thiserror::Error, Debug)]
-#[error("Unable to parse move command because of unexpected format")]
-struct ParseMoveCmdError {}
-
 impl FromStr for MoveCmd {
-    type Err = ParseMoveCmdError;
+    type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let [command, count] = s.split(" ").collect::<Vec<_>>()[..] {
-            let count: u8 = count.parse::<u8>().map_err(|_| ParseMoveCmdError {})?;
+        if let [command, count] = s.split(' ').collect::<Vec<_>>()[..] {
+            let count: u8 = count.parse::<u8>()?;
 
             return match command {
                 "up" => Ok(MoveCmd::Up(count)),
                 "down" => Ok(MoveCmd::Down(count)),
                 "forward" => Ok(MoveCmd::Forward(count)),
-                _ => Err(ParseMoveCmdError {}),
+                _ => Err(anyhow::anyhow!("Parse error: Invalid command")),
             };
         }
-        Err(ParseMoveCmdError {})
+        Err(anyhow::anyhow!("Parse error: Invalid format"))
     }
 }
 
@@ -68,14 +60,11 @@ impl SubmarinePos {
 }
 
 fn main() -> Result<(), anyhow::Error> {
-    let puzzle_input = File::open("input.txt")?;
-
-    let movements: Vec<MoveCmd> = BufReader::new(puzzle_input)
+    let movements: Vec<MoveCmd> = fs::read_to_string("input.txt")?
         .lines()
-        .collect::<Result<Vec<String>, std::io::Error>>()?
         .into_iter()
-        .map(|m| m.parse())
-        .collect::<Result<Vec<MoveCmd>, ParseMoveCmdError>>()?;
+        .map(str::parse)
+        .collect::<Result<Vec<MoveCmd>, anyhow::Error>>()?;
 
     let SubmarinePos { hpos, depth, .. } = SubmarinePos::from(&movements);
     println!("{}", hpos * depth);
