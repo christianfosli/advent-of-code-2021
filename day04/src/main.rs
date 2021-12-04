@@ -2,20 +2,26 @@ use std::str::FromStr;
 
 #[derive(Clone, Debug)]
 struct Board {
-    /// 5 x 5 board. get chunks of 5 to get each row
+    /// 5 x 5 board stored as 25 consecutive numbers.
+    /// The bool indicates wether the number has been drawn or not.
+    /// Get chunks of 5 to get each row
     numbers: [(u8, bool); 25],
 }
 
 impl Board {
-    fn on_num_draw(&mut self, n: u8) {
+    fn mark_num(&mut self, n: u8) {
         if let Some(found_pos) = self.numbers.iter().position(|(num, _)| *num == n) {
             self.numbers[found_pos].1 = true;
         }
     }
 
     fn has_bingo(&self) -> bool {
-        let mut rows = self.numbers.chunks(5);
-        if rows.any(|row| row.iter().all(|(_, checked)| *checked)) {
+        if self
+            .numbers
+            .chunks(5)
+            .any(|row| row.iter().all(|(_, marked)| *marked))
+        {
+            // bingo on a row
             return true;
         }
 
@@ -24,9 +30,12 @@ impl Board {
             transpose::transpose(&self.numbers, &mut transposed, 5, 5);
             transposed
         };
-        let mut cols = cols.chunks(5);
 
-        if cols.any(|row| row.iter().all(|(_, checked)| *checked)) {
+        if cols
+            .chunks(5)
+            .any(|row| row.iter().all(|(_, marked)| *marked))
+        {
+            // bingo on a column
             return true;
         }
 
@@ -52,24 +61,43 @@ impl FromStr for Board {
         for (i, line) in s.lines().enumerate() {
             for (j, num) in line.split_whitespace().enumerate() {
                 let num: u8 = num.parse()?;
-                numbers[i * 5 + j] = (num, false)
+                numbers[i * 5 + j] = (num, false);
             }
         }
         Ok(Board { numbers })
     }
 }
 
+/// part 1
 fn play_bingo(draws: &[u8], boards: &mut [Board]) -> (u8, Board) {
     for draw in draws {
         for board in &mut *boards {
-            board.on_num_draw(*draw);
+            board.mark_num(*draw);
             if board.has_bingo() {
-                dbg!(&board);
                 return (*draw, board.clone());
             }
         }
     }
-    unreachable!("");
+    panic!("nobody got bingo");
+}
+
+/// part 2
+/// returns the board that got bingo last
+fn play_anti_bingo(draws: &[u8], boards: &[Board]) -> (u8, Board) {
+    let mut rem_boards = boards.to_vec();
+
+    for draw in draws {
+        for board in &mut rem_boards {
+            board.mark_num(*draw);
+        }
+
+        if rem_boards.len() == 1 && rem_boards[0].has_bingo() {
+            return (*draw, rem_boards[0].clone());
+        }
+
+        rem_boards.retain(|board| !board.has_bingo());
+    }
+    panic!("no single board got bingo last")
 }
 
 fn main() -> Result<(), anyhow::Error> {
@@ -77,18 +105,24 @@ fn main() -> Result<(), anyhow::Error> {
     let mut splits = input.split("\n\n");
     let draws: Vec<u8> = splits
         .next()
-        .unwrap()
+        .ok_or(anyhow::anyhow!("input.txt missing draw numbers"))?
         .split(',')
-        .map(|n| n.parse().unwrap())
-        .collect();
+        .map(str::parse)
+        .collect::<Result<Vec<_>, _>>()?;
 
-    let mut boards: Vec<Board> = splits
-        .map(|board| board.parse::<Board>().unwrap())
-        .collect();
+    let mut boards: Vec<Board> = splits.map(str::parse).collect::<Result<Vec<_>, _>>()?;
 
-    let (winning_draw, winning_board) = play_bingo(&draws, &mut boards);
+    let boards_2 = boards.clone(); // need unmodified boards for part 2
 
-    println!("{}", winning_board.score(winning_draw));
+    let (last_drawn, winning_board) = play_bingo(&draws, &mut boards);
+    println!(
+        "part 1 - winning score: {}",
+        winning_board.score(last_drawn)
+    );
+
+    let (last_drawn, last_rem_board) = play_anti_bingo(&draws, &boards_2);
+    println!("part 2 - last score: {}", last_rem_board.score(last_drawn));
+
     Ok(())
 }
 
@@ -131,8 +165,26 @@ mod tests {
             .map(|board| board.parse::<Board>().unwrap())
             .collect();
 
-        let (winning_draw, winning_board) = play_bingo(&draws, &mut boards);
+        let (last_drawn, winning_board) = play_bingo(&draws, &mut boards);
 
-        assert_eq!(4512, winning_board.score(winning_draw));
+        assert_eq!(4512, winning_board.score(last_drawn));
+    }
+
+    #[test]
+    fn it_passes_aoc_testcase_2() {
+        let mut splits = TEST_INPUT.split("\n\n");
+        let draws: Vec<u8> = splits
+            .next()
+            .unwrap()
+            .split(',')
+            .map(|n| n.parse().unwrap())
+            .collect();
+
+        let boards: Vec<Board> = splits
+            .map(|board| board.parse::<Board>().unwrap())
+            .collect();
+
+        let (last_drawn, last_rem_board) = play_anti_bingo(&draws, &boards);
+        assert_eq!(1924, last_rem_board.score(last_drawn));
     }
 }
