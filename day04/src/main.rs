@@ -33,7 +33,7 @@ impl Board {
 
         if cols
             .chunks(5)
-            .any(|row| row.iter().all(|(_, marked)| *marked))
+            .any(|col| col.iter().all(|(_, marked)| *marked))
         {
             // bingo on a column
             return true;

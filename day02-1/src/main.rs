@@ -12,7 +12,7 @@ impl FromStr for MoveCmd {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let [command, count] = s.split(' ').collect::<Vec<_>>()[..] {
-            let count: u8 = count.parse::<u8>()?;
+            let count: u8 = count.parse()?;
 
             return match command {
                 "up" => Ok(MoveCmd::Up(count)),
@@ -57,7 +57,7 @@ fn main() -> Result<(), anyhow::Error> {
         .lines()
         .into_iter()
         .map(str::parse)
-        .collect::<Result<Vec<MoveCmd>, anyhow::Error>>()?;
+        .collect::<Result<Vec<_>, _>>()?;
 
     let SubmarinePos { hpos, depth } = SubmarinePos::from(&movements);
     println!("{}", hpos * depth);

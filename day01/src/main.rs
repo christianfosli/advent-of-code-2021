@@ -1,4 +1,4 @@
-use std::{fs, num::ParseIntError};
+use std::fs;
 
 use itermore::IterMore;
 
@@ -7,7 +7,7 @@ fn main() -> Result<(), anyhow::Error> {
         .lines()
         .into_iter()
         .map(str::parse)
-        .collect::<Result<Vec<u16>, ParseIntError>>()?;
+        .collect::<Result<Vec<_>, _>>()?;
 
     println!("part 1: {}", count_number_of_increases(&measurements));
 
