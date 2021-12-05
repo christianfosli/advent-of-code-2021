@@ -105,9 +105,4 @@ mod tests {
         let lines = get_test_input();
         assert_eq!(12, count_intersections(&lines, (10, 10)));
     }
-
-    #[test]
-    fn it_fails() {
-        panic!("noooo");
-    }
 }
