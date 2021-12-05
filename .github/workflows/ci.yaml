@@ -19,13 +19,13 @@ jobs:
               cargo check || printf '%s\n' "$d" >> ../failures
               cargo clippy || printf '%s\n' "$d" >> ../failures
               cargo test || printf '%s\n' "$d" >> ../failures
-              printf '\n\n============================================================\n\n'
-              cd -
+              printf '\n========================================================\n'
+              cd - 1>/dev/null
             fi
           done
 
           if [[ -f failures ]]; then
             printf 'One or more solutions failed:\n' 1>&2
-            cat failure 1>&2
+            cat failures 1>&2
             exit 1
           fi
