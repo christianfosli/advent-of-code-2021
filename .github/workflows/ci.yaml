@@ -19,6 +19,7 @@ jobs:
               cargo check || printf '%s\n' "$d" >> ../failures
               cargo clippy || printf '%s\n' "$d" >> ../failures
               cargo test || printf '%s\n' "$d" >> ../failures
+              printf '\n\n============================================================\n\n'
               cd -
             fi
           done
