@@ -16,9 +16,9 @@ jobs:
             if [[ -f "$d/Cargo.toml" ]]; then
               cd "$d"
               printf '\n\nChecking %s\n\n' "$d"
-              cargo check || printf '%s\n' "$d" >> failures
-              cargo clippy || printf '%s\n' "$d" >> failures
-              cargo test || printf '%s\n' "$d" >> failures
+              cargo check || printf '%s\n' "$d" >> ../failures
+              cargo clippy || printf '%s\n' "$d" >> ../failures
+              cargo test || printf '%s\n' "$d" >> ../failures
               cd -
             fi
           done
