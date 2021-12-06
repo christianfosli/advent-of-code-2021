@@ -1,16 +1,25 @@
-/// part 1
-fn count_lanternfish_after_n_days(lanternfish: &[u8], n: usize) -> usize {
-    (0..n)
-        .fold(lanternfish.to_vec(), |fish, _day| {
-            let num_newborns = fish.iter().filter(|&&f| f == 0).count();
-            let new_fish = fish
-                .iter()
-                .map(|&f| if f == 0 { 6 } else { f - 1 })
-                .chain(vec![8; num_newborns]);
-            new_fish.collect::<Vec<u8>>()
-        })
-        .iter()
-        .count()
+use std::collections::HashMap;
+
+fn count_lanternfish_after_n_days(fish: &[u8], n: usize) -> usize {
+    // store as map < internal_timer: u8 , number_of_fish: usize >
+    let mut fishmap: HashMap<u8, usize> = (0..=8)
+        .map(|timer| (timer, fish.iter().filter(|&&f| f == timer).count()))
+        .collect();
+
+    for _ in 0..n {
+        let zeros = fishmap[&0];
+
+        // fish with timer != 0 decrease their timer by one
+        for (timer, &count) in fishmap.clone().iter().filter(|(&timer, _)| timer != 0) {
+            *fishmap.get_mut(&(timer - 1)).unwrap() = count;
+        }
+
+        // fish with timer 0 reset to 6 and create babies with timer 8
+        *fishmap.get_mut(&8).unwrap() = zeros;
+        *fishmap.get_mut(&6).unwrap() += zeros;
+    }
+
+    fishmap.iter().fold(0, |acc, (_, &count)| acc + count)
 }
 
 fn main() -> Result<(), anyhow::Error> {
@@ -23,6 +32,11 @@ fn main() -> Result<(), anyhow::Error> {
     println!(
         "part 1: {}",
         count_lanternfish_after_n_days(&lanternfish, 80)
+    );
+
+    println!(
+        "part 2: {}",
+        count_lanternfish_after_n_days(&lanternfish, 256)
     );
 
     Ok(())
@@ -39,7 +53,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "too slow!"]
     fn it_passes_aoc_testcase_2() {
         let lanternfish = vec![3, 4, 3, 1, 2];
         assert_eq!(
