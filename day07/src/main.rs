@@ -25,12 +25,9 @@ fn find_best_alignment_2(crabs: &[u16]) -> Option<(u16, usize)> {
 
     for pos in 0..=*max_pos {
         let req_fuel = crabs.iter().fold(0, |acc, el| {
-            let diff = usize::from(max(pos, *el) - min(*el, pos));
-            if diff == 0 || diff == 1 {
-                acc + diff
-            } else {
-                acc + (1..=diff).reduce(|acc, el| acc + el).unwrap()
-            }
+            let dist = usize::from(max(pos, *el) - min(*el, pos));
+            // the sum of first n natural numbers is n(n+1)/2 (thanks @tormodfj !)
+            acc + dist * (dist + 1) / 2
         });
 
         if best_alignment == None || req_fuel < best_alignment?.1 {
