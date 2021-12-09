@@ -113,6 +113,7 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     }
 
     #[test]
+    #[ignore = "not yet implemented"]
     fn it_passes_aoc_testcase_2() {
         let signals: Vec<String> = EXAMPLE_SIGNALS.lines().map(String::from).collect();
         assert_eq!(61_229, add_output_values(&signals));
