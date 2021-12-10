@@ -67,6 +67,6 @@ mod tests {
     #[test]
     fn it_passes_aoc_testcase_1() {
         let heatmap = to_matrix(TEST_HEATMAP).unwrap();
-        assert_eq!(15, sum_risk_level_of_lows(&heatmap).unwrap())
+        assert_eq!(15, sum_risk_level_of_lows(&heatmap))
     }
 }
