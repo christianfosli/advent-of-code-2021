@@ -36,10 +36,11 @@ fn most_common_minus_least_common(s: &str) -> Option<usize> {
 }
 
 fn parse(input: &str) -> (String, HashMap<(char, char), char>) {
-    let mut itr = input.trim_end().lines();
-    let template = itr.next().unwrap().to_string();
+    let template = input.lines().next().unwrap().to_string();
 
-    let map: HashMap<(char, char), char> = itr
+    let map: HashMap<(char, char), char> = input
+        .lines()
+        .skip(2)
         .filter_map(|line| {
             if let [from, to] = line.split(" -> ").collect::<Vec<_>>()[..] {
                 Some((
