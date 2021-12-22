@@ -19,11 +19,11 @@ fn count_easy_digits_in_output(signals: &[String]) -> usize {
 
 /// part 2 -- DOES NOT WORK YET!
 fn add_output_values(signals: &[String]) -> usize {
-    signals.iter().map(|s| find_output(&s)).sum()
+    signals.iter().map(|s| find_output(s)).sum()
 }
 
-fn find_output(signals: &String) -> usize {
-    if let [signals, output] = signals.split(" | ").collect::<Vec<_>>()[..] {
+fn find_output(signals: &str) -> usize {
+    if let [signals, _output] = signals.split(" | ").collect::<Vec<_>>()[..] {
         let mut translations: HashMap<char, char> = HashMap::new();
 
         let c_or_f: HashSet<char> = signals
